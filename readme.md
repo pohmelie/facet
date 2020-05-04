@@ -39,9 +39,11 @@ class B(ServiceMixin):
 
     async def start(self):
         self.value += 1
+        logging.info("b started")
 
     async def stop(self):
         self.value -= 1
+        logging.info("b stopped")
 
 
 class A(ServiceMixin):
@@ -53,21 +55,27 @@ class A(ServiceMixin):
     def dependencies(self):
         return [self.b]
 
+    async def start(self):
+        logging.info("a started")
+
+    async def stop(self):
+        logging.info("a stopped")
+
 
 logging.basicConfig(level=logging.DEBUG)
 asyncio.run(A().run())
 ```
 This will produce:
 ```
-INFO:facet:[B] - service started
-INFO:facet:[A] - service started
+INFO:root:b started
+INFO:root:a started
 ```
 Start and stop order determined by strict rule: **dependencies must be started first and stopped last**. That is why `B` starts before `A`. Since `A` may use `B` in `start` routine.
 
 Hit `ctrl-c` and you will see:
 ```
-INFO:facet:[A] - service stopped
-INFO:facet:[B] - service stopped
+INFO:root:a stopped
+INFO:root:b stopped
 Traceback (most recent call last):
   ...
 KeyboardInterrupt
@@ -107,7 +115,6 @@ asyncio.run(A().run())
 This will lead to background task creation and handling:
 ```
 INFO:root:start done
-INFO:facet:[A] - service started
 INFO:root:task done
 ```
 Any non-handled exception on background task will lead the whole service stack crashed. This is also a key feature to fall down fast and loud.
@@ -176,9 +183,3 @@ async def stop(self):
     pass
 ```
 Stop routine.
-
-## `log`
-``` python
-async def log(self, level, message, *, exc_info=None):
-```
-Logging routine. Should be overridden in subclass in the same way as `graceful_shutdown_timeout` to handle non-standard logging module/engine.

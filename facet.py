@@ -56,13 +56,11 @@ class ServiceMixin:
             raise
         else:
             self.__running = True
-            await self.log(logging.INFO, "service started")
 
     async def __stop(self):
         self.__running = False
         try:
             await self.stop()
-            await self.log(logging.INFO, "service stopped")
         finally:
             await self.__stop_dependencies()
         self.__exit_point = None
@@ -119,6 +117,3 @@ class ServiceMixin:
 
     async def stop(self):
         pass
-
-    async def log(self, level, message, *, exc_info=None):
-        logger.log(level, "[%s] - %s", self.__class__.__name__, message, exc_info=exc_info)
