@@ -14,7 +14,7 @@ Service manager for asyncio.
 
 # Features
 - Simple (`start`, `stop`, `dependencies` and `add_task`).
-- Configurable via inheritance (graceful shutdown timeout, logging).
+- Configurable via inheritance (graceful shutdown timeout).
 - Mixin (no `super()` required).
 - Requires no runner engine (`Worker`, `Runner`, etc.) just plain `await` or `async with`.
 
