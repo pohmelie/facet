@@ -1,11 +1,8 @@
-import logging
 from asyncio import Future, Lock, create_task, gather, wait, wait_for
 
 __all__ = ("ServiceMixin",)
 __version__ = "0.1.0"
 version = tuple(map(int, __version__.split(".")))
-
-logger = logging.getLogger(__name__)
 
 
 class ServiceMixin:
