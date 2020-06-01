@@ -1,4 +1,4 @@
-from asyncio import Future, Lock, create_task, gather, wait, wait_for
+from asyncio import Future, Lock, Task, create_task, gather, wait, wait_for
 
 __all__ = ("ServiceMixin",)
 __version__ = "0.1.0"
@@ -100,10 +100,10 @@ class ServiceMixin:
         return []
 
     @property
-    def running(self):
+    def running(self) -> bool:
         return self.__running
 
-    async def add_task(self, coro):
+    def add_task(self, coro) -> Task:
         task = create_task(coro)
         task.add_done_callback(self.__task_callback)
         self.__tasks.append(task)

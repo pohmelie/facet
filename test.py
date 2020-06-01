@@ -116,7 +116,7 @@ class WithTask(ServiceMixin):
             raise
 
     async def start(self):
-        await self.add_task(self.task())
+        self.add_task(self.task())
 
 
 @pytest.mark.asyncio
@@ -133,7 +133,7 @@ class WithTaskException(ServiceMixin):
         raise RuntimeError
 
     async def start(self):
-        await self.add_task(self.task())
+        self.add_task(self.task())
 
 
 @pytest.mark.asyncio

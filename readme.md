@@ -105,7 +105,7 @@ class A(ServiceMixin):
         logging.info("task done")
 
     async def start(self):
-        await self.add_task(self.task())
+        self.add_task(self.task())
         logging.info("start done")
 
 
@@ -160,13 +160,13 @@ Should return iterable of current service dependencies instances.
 ## `running`
 ``` python
 @property
-def running(self):
+def running(self) -> bool:
 ```
 Check if service is running
 
 ## `add_task`
 ``` python
-async def add_task(self, coro):
+def add_task(self, coro) -> asyncio.Task:
 ```
 Add background task.
 
