@@ -121,9 +121,8 @@ class WithTask(ServiceMixin):
 
 @pytest.mark.asyncio
 async def test_added_task_cancelation():
-    with pytest.raises(asyncio.CancelledError):
-        async with WithTask() as service:
-            pass
+    async with WithTask() as service:
+        pass
     assert service.task_cancelled == 1
 
 

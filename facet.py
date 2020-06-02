@@ -37,6 +37,9 @@ class ServiceMixin:
             if not task.done():
                 task.cancel()
                 stops.append(task)
+        if stops:
+            await wait(stops)
+        stops = []
         for dependency in self.dependencies:
             stops.append(create_task(dependency.__aexit__(None, None, None)))
         if stops:
