@@ -1,7 +1,7 @@
 from asyncio import Future, Lock, Task, create_task, gather, wait, wait_for
 
 __all__ = ("ServiceMixin",)
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 version = tuple(map(int, __version__.split(".")))
 
 
