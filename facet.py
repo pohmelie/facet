@@ -27,7 +27,7 @@ class ServiceMixin:
         for dependency in self.dependencies:
             # propagate exit point
             dependency._ServiceMixin__exit_point = self.__exit_point
-            starts.append(create_task(dependency.__aenter__()))
+            starts.append(create_task(dependency.__start()))
         if starts:
             await self.__wait_with_cancellation_on_fail(starts)
 
@@ -41,23 +41,35 @@ class ServiceMixin:
             await wait(stops)
         stops = []
         for dependency in self.dependencies:
-            stops.append(create_task(dependency.__aexit__(None, None, None)))
+            stops.append(create_task(dependency.__stop()))
         if stops:
             await self.__wait_with_cancellation_on_fail(stops)
 
     async def __start(self):
-        if self.__exit_point is None:
-            self.__exit_point = Future()
-        await self.__start_dependencies()
-        try:
-            await self.start()
-        except:  # noqa
-            await self.__stop_dependencies()
-            raise
-        else:
-            self.__running = True
+        if self.__start_lock is None:
+            self.__start_lock = Lock()
+        async with self.__start_lock:
+            if self.__running:
+                return
+            if self.__exit_point is None:
+                self.__exit_point = Future()
+            await self.__start_dependencies()
+            try:
+                await self.start()
+            except:  # noqa
+                await self.__stop_dependencies()
+                raise
+            else:
+                self.__running = True
 
     async def __stop(self):
+        if self.__stop_lock is None:
+            self.__stop_lock = Lock()
+        async with self.__stop_lock:
+            if self.__running:
+                await wait_for(self.__stop_two_steps(), timeout=self.graceful_shutdown_timeout)
+
+    async def __stop_two_steps(self):
         self.__running = False
         try:
             await self.stop()
@@ -66,19 +78,11 @@ class ServiceMixin:
         self.__exit_point = None
 
     async def __aenter__(self):
-        if self.__start_lock is None:
-            self.__start_lock = Lock()
-        async with self.__start_lock:
-            if not self.__running:
-                await self.__start()
+        await self.__start()
         return self
 
     async def __aexit__(self, *exc_info):
-        if self.__stop_lock is None:
-            self.__stop_lock = Lock()
-        async with self.__stop_lock:
-            if self.__running:
-                await wait_for(self.__stop(), timeout=self.graceful_shutdown_timeout)
+        await self.__stop()
 
     def __task_callback(self, task):
         if task.cancelled():
