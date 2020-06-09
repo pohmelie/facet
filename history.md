@@ -1,5 +1,8 @@
 # x.x.x (xx-xx-xxxx)
 
+# 0.4.0 (09-06-2020)
+- remove unnecessary dunder calls
+
 # 0.3.0 (02-06-2020)
 - proper background tasks cancellation
 
