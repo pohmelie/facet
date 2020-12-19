@@ -1,4 +1,12 @@
-from asyncio import Future, Lock, Task, create_task, gather, wait, wait_for
+from asyncio import Future, Lock, Task, gather, wait, wait_for
+
+try:
+    from asyncio import create_task
+except ImportError:
+    from asyncio import ensure_future
+
+    def create_task(coro):
+        return ensure_future(coro)
 
 __all__ = ("ServiceMixin",)
 __version__ = "0.4.0"
