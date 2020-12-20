@@ -22,7 +22,7 @@ Service manager for asyncio.
 `facet` is offered under MIT license.
 
 # Requirements
-* python 3.7+
+* python 3.6+
 
 # Usage
 ``` python

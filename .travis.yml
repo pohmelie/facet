@@ -19,6 +19,17 @@ jobs:
           docker run --rm -v $(pwd):/source -w /source python:3.7-slim bash -c "
           pip install -e ./[dev];
           flake8"
+    - name: cpython 3.6
+      stage: test
+      install:
+        - pip install codecov
+      script:
+        - >
+          docker run --rm -v $(pwd):/source -w /source python:3.6-slim bash -c "
+          pip install -e ./[dev];
+          pytest"
+      after_success:
+        - codecov
     - name: cpython 3.7
       stage: test
       install:
