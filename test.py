@@ -102,6 +102,15 @@ async def test_diamond_dependencies():
     assert a.c.stop_count == 1
 
 
+@pytest.mark.asyncio
+async def test_c_does_not_stops():
+    async with A() as a:
+        async with B(a.c):
+            pass
+        assert a.c.running is True
+    assert a.c.running is False
+
+
 class WithTask(ServiceMixin):
 
     def __init__(self):
