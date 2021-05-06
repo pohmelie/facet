@@ -121,6 +121,26 @@ Any non-handled exception on background task will lead the whole service stack c
 
 All background tasks will be cancelled and awaited on service stop.
 
+You can manage dependencies start/stop to start sequently, parallel or mixed. Like this:
+``` python
+class A(ServiceMixin):
+
+    def __init__(self):
+        self.b = B()
+        self.c = C()
+        self.d = D()
+
+    @property
+    def dependencies(self):
+        return [
+            [self.b, self.c],
+            self.d,
+        ]
+```
+This leads to first `b` and `c` starts parallel, after they successfully started `d` will try to start, and then `a` itself start will be called. And on stop routine `a` stop called first, then `d` stop, then both `b` and `c` stops parallel.
+
+The rule here is **first nesting level is sequential, second nesting level is parallel**
+
 # API
 Here is public methods you get on inheritance/mixin:
 ## `wait`

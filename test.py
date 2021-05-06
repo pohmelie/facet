@@ -1,4 +1,5 @@
 import asyncio
+import time
 
 import pytest
 
@@ -51,22 +52,31 @@ async def test_start_failed():
     assert service.running is False
 
 
-class C(ServiceMixin):
+class StatsService(ServiceMixin):
 
     def __init__(self):
         self.start_count = 0
+        self.start_time = None
         self.stop_count = 0
+        self.stop_time = None
 
     async def start(self):
         self.start_count += 1
+        self.start_time = time.perf_counter()
 
     async def stop(self):
         self.stop_count += 1
+        self.stop_time = time.perf_counter()
 
 
-class B(ServiceMixin):
+class C(StatsService):
+    pass
+
+
+class B(StatsService):
 
     def __init__(self, c: C):
+        super().__init__()
         self.c = c
 
     @property
@@ -76,9 +86,10 @@ class B(ServiceMixin):
         ]
 
 
-class A(ServiceMixin):
+class A(StatsService):
 
     def __init__(self):
+        super().__init__()
         self.c = C()
         self.b1 = B(self.c)
         self.b2 = B(self.c)
@@ -100,6 +111,8 @@ async def test_diamond_dependencies():
         assert a.c.running is True
     assert a.c.start_count == 1
     assert a.c.stop_count == 1
+    assert a.c.start_time < a.b1.start_time < a.b2.start_time < a.start_time
+    assert a.stop_time < a.b2.stop_time < a.b1.stop_time < a.c.stop_time
 
 
 @pytest.mark.asyncio
@@ -200,3 +213,27 @@ async def test_start_exception():
     assert service.stop_called == 0
     assert service.b.start_called == 1
     assert service.b.stop_called == 0
+
+
+class Parallel(StatsService):
+
+    def __init__(self):
+        super().__init__()
+        self.services = [StatsService(), StatsService(), StatsService()]
+
+    @property
+    def dependencies(self):
+        return [self.services]
+
+
+@pytest.mark.asyncio
+async def test_start_groups():
+    async with Parallel() as parallel:
+        pass
+    assert all(s.start_count == 1 and s.stop_count == 1 for s in parallel.services)
+
+
+@pytest.mark.asyncio
+async def test_empty_methods():
+    async with ServiceMixin():
+        pass

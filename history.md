@@ -1,4 +1,11 @@
 # x.x.x (xx-xx-xxxx)
+- add support for sequential, parallel and mixed starts/stops for dependencies
+
+# 0.6.0 (26-12-2020)
+- add dependent counter to prevent early stops
+
+# 0.5.0 (20-12-2020)
+- add python 3.6 support
 
 # 0.4.0 (09-06-2020)
 - remove unnecessary dunder calls

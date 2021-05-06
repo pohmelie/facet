@@ -29,13 +29,16 @@ class ServiceMixin:
 
     async def __start_dependencies(self):
         self.__tasks = []
-        starts = []
-        for dependency in self.dependencies:
-            # propagate exit point
-            dependency._ServiceMixin__exit_point = self.__exit_point
-            starts.append(create_task(dependency.__start()))
-        if starts:
-            await self.__wait_with_cancellation_on_fail(starts)
+        for group in self.dependencies:
+            if isinstance(group, ServiceMixin):
+                group = [group]
+            starts = []
+            for dependency in group:
+                # propagate exit point
+                dependency._ServiceMixin__exit_point = self.__exit_point
+                starts.append(create_task(dependency.__start()))
+            if starts:
+                await self.__wait_with_cancellation_on_fail(starts)
 
     async def __stop_dependencies(self):
         stops = []
@@ -45,11 +48,14 @@ class ServiceMixin:
                 stops.append(task)
         if stops:
             await wait(stops)
-        stops = []
-        for dependency in self.dependencies:
-            stops.append(create_task(dependency.__stop()))
-        if stops:
-            await self.__wait_with_cancellation_on_fail(stops)
+        for group in reversed(self.dependencies):
+            if isinstance(group, ServiceMixin):
+                group = [group]
+            stops = []
+            for dependency in group:
+                stops.append(create_task(dependency.__stop()))
+            if stops:
+                await self.__wait_with_cancellation_on_fail(stops)
 
     async def __start(self):
         if self.__start_lock is None:
