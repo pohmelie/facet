@@ -52,6 +52,17 @@ jobs:
           pytest"
       after_success:
         - codecov
+    - name: cpython 3.9
+      stage: test
+      install:
+        - pip install codecov
+      script:
+        - >
+          docker run --rm -v $(pwd):/source -w /source python:3.9-slim bash -c "
+          pip install -e ./[dev];
+          pytest"
+      after_success:
+        - codecov
     - name: deploy
       stage: deploy
       script:
