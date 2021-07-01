@@ -76,6 +76,20 @@ async def test_start_failed_later():
     assert valid.running is False
 
 
+@pytest.mark.asyncio
+async def test_start_failed_earlier():
+    valid = Simple()
+    broken = StartFailed()
+    root = Root([broken, valid])
+    assert root.running is False
+    with pytest.raises(RuntimeError):
+        await root.run()
+
+    assert valid.started is False
+    assert valid.stopped is False
+    assert valid.running is False
+
+
 class DelayedStartFailed(StartFailed):
     async def start(self):
         await asyncio.sleep(0)
