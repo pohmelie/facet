@@ -54,7 +54,7 @@ async def test_start_failed():
 
 class Root(Simple):
     def __init__(self, deps):
-        super(Root, self).__init__()
+        super().__init__()
         self.deps = deps
 
     @property
@@ -79,7 +79,7 @@ async def test_start_failed_later():
 class DelayedStartFailed(StartFailed):
     async def start(self):
         await asyncio.sleep(0)
-        await super(DelayedStartFailed, self).start()
+        await super().start()
 
 
 @pytest.mark.asyncio
