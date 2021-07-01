@@ -1,5 +1,8 @@
 # x.x.x (xx-xx-xxxx)
 
+# 0.8.0 (02-07-2021)
+- stop dependencies if some of them raised exception on start
+
 # 0.7.0 (06-05-2021)
 - add support for sequential, parallel and mixed starts/stops for dependencies
 - add python 3.9 support
