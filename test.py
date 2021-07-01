@@ -52,6 +52,64 @@ async def test_start_failed():
     assert service.running is False
 
 
+class Root(Simple):
+    def __init__(self, deps):
+        super().__init__()
+        self.deps = deps
+
+    @property
+    def dependencies(self):
+        return self.deps
+
+
+@pytest.mark.asyncio
+async def test_start_failed_later():
+    valid = Simple()
+    broken = StartFailed()
+    root = Root([valid, broken])
+    assert root.running is False
+    with pytest.raises(RuntimeError):
+        await root.run()
+
+    assert valid.started is True
+    assert valid.stopped is True
+    assert valid.running is False
+
+
+@pytest.mark.asyncio
+async def test_start_failed_earlier():
+    valid = Simple()
+    broken = StartFailed()
+    root = Root([broken, valid])
+    assert root.running is False
+    with pytest.raises(RuntimeError):
+        await root.run()
+
+    assert valid.started is False
+    assert valid.stopped is False
+    assert valid.running is False
+
+
+class DelayedStartFailed(StartFailed):
+    async def start(self):
+        await asyncio.sleep(0)
+        await super().start()
+
+
+@pytest.mark.asyncio
+async def test_start_failed_parallel_later():
+    valid = Simple()
+    broken = DelayedStartFailed()
+    root = Root([[broken, valid]])
+    assert root.running is False
+    with pytest.raises(RuntimeError):
+        await root.run()
+
+    assert valid.started is True
+    assert valid.stopped is True
+    assert valid.running is False
+
+
 class StatsService(ServiceMixin):
 
     def __init__(self):
