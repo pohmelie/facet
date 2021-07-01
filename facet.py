@@ -28,7 +28,7 @@ class ServiceMixin:
             await wait(tasks)
 
     async def __start_dependencies(self):
-        self.__tasks = []
+        self.__tasks = set()
         for group in self.dependencies:
             if isinstance(group, ServiceMixin):
                 group = [group]
@@ -104,6 +104,7 @@ class ServiceMixin:
         exc = task.exception()
         if exc:
             self.__exit_point.set_exception(exc)
+        self.__tasks.discard(task)
 
     async def wait(self):
         await self.__exit_point
@@ -127,7 +128,7 @@ class ServiceMixin:
     def add_task(self, coro) -> Task:
         task = create_task(coro)
         task.add_done_callback(self.__task_callback)
-        self.__tasks.append(task)
+        self.__tasks.add(task)
         return task
 
     async def start(self):
