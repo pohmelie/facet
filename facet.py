@@ -66,8 +66,8 @@ class ServiceMixin:
                 return
             if self.__exit_point is None:
                 self.__exit_point = Future()
-            await self.__start_dependencies()
             try:
+                await self.__start_dependencies()
                 await self.start()
             except:  # noqa
                 await self.__stop_dependencies()
