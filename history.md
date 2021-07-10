@@ -1,5 +1,8 @@
 # x.x.x (xx-xx-xxxx)
 
+# 0.9.0 (10-07-2021)
+- remove done tasks from tasks set
+
 # 0.8.0 (02-07-2021)
 - stop dependencies if some of them raised exception on start
 
