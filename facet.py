@@ -99,12 +99,12 @@ class ServiceMixin:
         await self.__stop()
 
     def __task_callback(self, task):
+        self.__tasks.discard(task)
         if task.cancelled():
             return
         exc = task.exception()
         if exc:
             self.__exit_point.set_exception(exc)
-        self.__tasks.discard(task)
 
     async def wait(self):
         await self.__exit_point
