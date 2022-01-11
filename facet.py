@@ -6,7 +6,7 @@ except ImportError:
     from asyncio import ensure_future as create_task
 
 __all__ = ("ServiceMixin",)
-__version__ = "0.9.0"
+__version__ = "0.9.1"
 version = tuple(map(int, __version__.split(".")))
 
 
