@@ -1,5 +1,8 @@
 # x.x.x (xx-xx-xxxx)
 
+# 0.9.1 (11-01-2022)
+- prevent multiple calls to `set_exception`
+
 # 0.9.0 (10-07-2021)
 - remove done tasks from tasks set
 
