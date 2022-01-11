@@ -103,7 +103,7 @@ class ServiceMixin:
         if task.cancelled():
             return
         exc = task.exception()
-        if exc:
+        if exc and not self.__exit_point.done():
             self.__exit_point.set_exception(exc)
 
     async def wait(self):
