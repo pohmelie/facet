@@ -1,17 +1,9 @@
-from asyncio import Future, Lock, Task, gather, wait, wait_for
-
-try:
-    from asyncio import create_task
-except ImportError:
-    from asyncio import ensure_future as create_task
+from asyncio import Future, Lock, Task, create_task, gather, wait, wait_for
 
 __all__ = ("ServiceMixin",)
-__version__ = "0.9.1"
-version = tuple(map(int, __version__.split(".")))
 
 
 class ServiceMixin:
-
     __running = False
     __tasks = ()
     __start_lock = None

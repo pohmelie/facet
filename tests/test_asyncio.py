@@ -7,7 +7,6 @@ from facet import ServiceMixin
 
 
 class Simple(ServiceMixin):
-
     def __init__(self):
         self.started = False
         self.stopped = False
@@ -29,7 +28,6 @@ async def test_single_state():
 
 
 class StartFailed(ServiceMixin):
-
     def __init__(self):
         self.started = False
         self.stopped = False
@@ -111,7 +109,6 @@ async def test_start_failed_parallel_later():
 
 
 class StatsService(ServiceMixin):
-
     def __init__(self):
         self.start_count = 0
         self.start_time = None
@@ -132,20 +129,16 @@ class C(StatsService):
 
 
 class B(StatsService):
-
     def __init__(self, c: C):
         super().__init__()
         self.c = c
 
     @property
     def dependencies(self):
-        return [
-            self.c
-        ]
+        return [self.c]
 
 
 class A(StatsService):
-
     def __init__(self):
         super().__init__()
         self.c = C()
@@ -183,7 +176,6 @@ async def test_c_does_not_stops():
 
 
 class WithTask(ServiceMixin):
-
     def __init__(self):
         self.task_cancelled = 0
 
@@ -207,7 +199,6 @@ async def test_added_task_cancelation():
 
 
 class WithTaskException(ServiceMixin):
-
     async def task(self):
         raise RuntimeError
 
@@ -227,7 +218,6 @@ async def test_task_exception():
 
 
 class StartFailB(ServiceMixin):
-
     def __init__(self):
         self.start_called = 0
         self.stop_called = 0
@@ -241,7 +231,6 @@ class StartFailB(ServiceMixin):
 
 
 class StartFailA(ServiceMixin):
-
     def __init__(self):
         self.b = StartFailB()
         self.start_called = 0
@@ -274,7 +263,6 @@ async def test_start_exception():
 
 
 class Parallel(StatsService):
-
     def __init__(self):
         super().__init__()
         self.services = [StatsService(), StatsService(), StatsService()]

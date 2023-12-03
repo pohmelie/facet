@@ -12,4 +12,5 @@ __pycache__
 .vscode
 .mypy_cache
 .pytest_cache
+.ruff_cache
 coverage.xml
