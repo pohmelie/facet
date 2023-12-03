@@ -1,5 +1,5 @@
 # Facet
-[![Travis status for master branch](https://travis-ci.com/pohmelie/facet.svg?branch=master)](https://travis-ci.com/pohmelie/facet)
+[![Github actions status for master branch](https://github.com/pohmelie/facet/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/pohmelie/facet/actions/workflows/ci.yaml)
 [![Codecov coverage for master branch](https://codecov.io/gh/pohmelie/facet/branch/master/graph/badge.svg)](https://codecov.io/gh/pohmelie/facet)
 [![Pypi version](https://img.shields.io/pypi/v/facet.svg)](https://pypi.org/project/facet/)
 [![Pypi downloads count](https://img.shields.io/pypi/dm/facet)](https://pypi.org/project/facet/)
