@@ -189,6 +189,8 @@ class WithTask(ServiceMixin):
 
     async def start(self):
         self.add_task(self.task())
+        # ensure task scheduled by asyncio event loop
+        await asyncio.sleep(0)
 
 
 @pytest.mark.asyncio
