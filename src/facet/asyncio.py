@@ -1,17 +1,23 @@
 from asyncio import Future, Lock, Task, create_task, gather, wait, wait_for
+from collections.abc import Coroutine
+from typing import Any, Self
 
-__all__ = ("ServiceMixin",)
+__all__ = ("AsyncioServiceMixin",)
 
 
-class ServiceMixin:
-    __running = False
-    __tasks = ()
-    __start_lock = None
-    __stop_lock = None
-    __exit_point = None
-    __dependents = 0
+class AsyncioServiceMixinInternalError(Exception):
+    pass
 
-    async def __wait_with_cancellation_on_fail(self, tasks):
+
+class AsyncioServiceMixin:
+    __running: bool = False
+    __tasks: set[Task[Any]] | None = None
+    __start_lock: Lock | None = None
+    __stop_lock: Lock | None = None
+    __exit_point: Future[Any] | None = None
+    __dependents: int = 0
+
+    async def __wait_with_cancellation_on_fail(self, tasks: list[Task[Any]]) -> None:
         try:
             await gather(*tasks)
         finally:
@@ -19,29 +25,39 @@ class ServiceMixin:
                 task.cancel()
             await wait(tasks)
 
-    async def __start_dependencies(self):
+    def __ensure_tasks(self) -> set[Task[Any]]:
+        if self.__tasks is None:
+            raise AsyncioServiceMixinInternalError("tasks not initialized")
+        return self.__tasks
+
+    def __ensure_exit_point(self) -> Future[Any]:
+        if self.__exit_point is None:
+            raise AsyncioServiceMixinInternalError("exit point not initialized")
+        return self.__exit_point
+
+    async def __start_dependencies(self) -> None:
         self.__tasks = set()
         for group in self.dependencies:
-            if isinstance(group, ServiceMixin):
+            if isinstance(group, AsyncioServiceMixin):
                 group = [group]
             starts = []
             for dependency in group:
                 # propagate exit point
-                dependency._ServiceMixin__exit_point = self.__exit_point
+                setattr(dependency, "_AsyncioServiceMixin__exit_point", self.__ensure_exit_point())
                 starts.append(create_task(dependency.__start()))
             if starts:
                 await self.__wait_with_cancellation_on_fail(starts)
 
-    async def __stop_dependencies(self):
+    async def __stop_dependencies(self) -> None:
         stops = []
-        for task in self.__tasks:
+        for task in self.__ensure_tasks():
             if not task.done():
                 task.cancel()
                 stops.append(task)
         if stops:
             await wait(stops)
         for group in reversed(self.dependencies):
-            if isinstance(group, ServiceMixin):
+            if isinstance(group, AsyncioServiceMixin):
                 group = [group]
             stops = []
             for dependency in group:
@@ -49,7 +65,7 @@ class ServiceMixin:
             if stops:
                 await self.__wait_with_cancellation_on_fail(stops)
 
-    async def __start(self):
+    async def __start(self) -> None:
         if self.__start_lock is None:
             self.__start_lock = Lock()
         async with self.__start_lock:
@@ -67,7 +83,7 @@ class ServiceMixin:
             else:
                 self.__running = True
 
-    async def __stop(self):
+    async def __stop(self) -> None:
         if self.__stop_lock is None:
             self.__stop_lock = Lock()
         async with self.__stop_lock:
@@ -75,7 +91,7 @@ class ServiceMixin:
             if self.__dependents == 0 and self.__running:
                 await wait_for(self.__stop_two_steps(), timeout=self.graceful_shutdown_timeout)
 
-    async def __stop_two_steps(self):
+    async def __stop_two_steps(self) -> None:
         self.__running = False
         try:
             await self.stop()
@@ -83,48 +99,49 @@ class ServiceMixin:
             await self.__stop_dependencies()
         self.__exit_point = None
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Self:
         await self.__start()
         return self
 
-    async def __aexit__(self, *exc_info):
+    async def __aexit__(self, *_: Any) -> None:
         await self.__stop()
 
-    def __task_callback(self, task):
-        self.__tasks.discard(task)
+    def __task_callback(self, task: Task[Any]) -> None:
+        self.__ensure_tasks().discard(task)
         if task.cancelled():
             return
         exc = task.exception()
-        if exc and not self.__exit_point.done():
-            self.__exit_point.set_exception(exc)
+        exit_point = self.__ensure_exit_point()
+        if exc and not exit_point.done():
+            exit_point.set_exception(exc)
 
-    async def wait(self):
-        await self.__exit_point
+    async def wait(self) -> None:
+        await self.__ensure_exit_point()
 
-    async def run(self):
+    async def run(self) -> None:
         async with self:
             await self.wait()
 
     @property
-    def graceful_shutdown_timeout(self):
+    def graceful_shutdown_timeout(self) -> int:
         return 10
 
     @property
-    def dependencies(self):
+    def dependencies(self) -> list[Self | list[Self]]:
         return []
 
     @property
     def running(self) -> bool:
         return self.__running
 
-    def add_task(self, coro) -> Task:
-        task = create_task(coro)
+    def add_task(self, coroutine: Coroutine[Any, Any, Any]) -> Task[Any]:
+        task: Task[Any] = create_task(coroutine)
         task.add_done_callback(self.__task_callback)
-        self.__tasks.add(task)
+        self.__ensure_tasks().add(task)
         return task
 
-    async def start(self):
+    async def start(self) -> None:
         pass
 
-    async def stop(self):
+    async def stop(self) -> None:
         pass

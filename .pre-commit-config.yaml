@@ -49,3 +49,8 @@ repos:
     name: Check with ruff
     entry: ruff
     args: ["check", "--fix", "."]
+
+  - <<: *python-linters
+    id: mypy
+    name: Validate types with MyPy
+    entry: mypy

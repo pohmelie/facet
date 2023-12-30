@@ -1,5 +1,11 @@
 # x.x.x (xx-xx-xxxx)
 
+# 0.10.0 (xx-xx-xxxx)
+- add `BlockingServiceMixin` with subset of functionality from `ServiceMixin` that can be used in non-async code
+- add `AsyncioServiceMixin` as an alias to `ServiceMixin`
+- `ServiceMixin` is now deprecated and will be removed in 1.0.0
+- add mypy type hints
+
 # 0.9.1 (11-01-2022)
 - prevent multiple calls to `set_exception`
 
