@@ -1,6 +1,6 @@
 [project]
 name = "facet"
-version = "0.9.1"
+version = "0.10.0"
 description = "service manager for asyncio"
 readme = "readme.md"
 requires-python = ">= 3.11"

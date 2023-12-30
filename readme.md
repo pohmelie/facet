@@ -54,6 +54,8 @@ Service manager for asyncio (and classic blocking code since version 0.10.0).
 ## Requirements
 - python 3.11+
 
+Last version with python 3.6+ support is 0.9.1
+
 ## Usage
 
 ### Asyncio
