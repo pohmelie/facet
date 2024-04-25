@@ -49,13 +49,12 @@ class AsyncioServiceMixin:
                 await self.__wait_with_cancellation_on_fail(starts)
 
     async def __stop_dependencies(self) -> None:
-        stops = []
-        for task in self.__ensure_tasks():
+        background_tasks = self.__ensure_tasks()
+        for task in background_tasks:
             if not task.done():
                 task.cancel()
-                stops.append(task)
-        if stops:
-            await wait(stops)
+        if background_tasks:
+            await wait(background_tasks)
         for group in reversed(self.dependencies):
             if isinstance(group, AsyncioServiceMixin):
                 group = [group]
