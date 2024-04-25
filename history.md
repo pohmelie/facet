@@ -1,5 +1,8 @@
 # x.x.x (xx-xx-xxxx)
 
+# 0.10.1 (30-12-2023)
+- fix `AsyncioServiceMixin` finalization. Background tasks can be in state `done`, but callback can be not called yet
+
 # 0.10.0 (30-12-2023)
 - add `BlockingServiceMixin` with subset of functionality from `ServiceMixin` that can be used in non-async code
 - add `AsyncioServiceMixin` as an alias to `ServiceMixin`
