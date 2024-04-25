@@ -26,11 +26,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - run: pip install -e ./[dev]
     - run: pytest
-    - uses: codecov/codecov-action@v2
+    - uses: codecov/codecov-action@v4
       if: github.ref == 'refs/heads/master'
       with:
         fail_ci_if_error: true
         verbose: true
+        token: ${{ secrets.CODECOV_TOKEN }}
 
   deploy:
     needs: tests
